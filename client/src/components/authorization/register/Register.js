@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import {useHistory} from 'react-router-dom'
 import axios from 'axios'
 import { clientKeys } from '../../../client-config/clientKeys'
 import { useStyles } from './styles'
@@ -6,43 +7,34 @@ import Button from '@material-ui/core/Button'
 import TextField from '@material-ui/core/TextField'
 
 
-function Login() {
+function Register() {
     const classes = useStyles()
-    const [email, setEmail] = useState('')
+    const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
+    let history = useHistory()
 
     const handleClick = (e) => {
         e.preventDefault()
         const transport = axios.create({ withCredentials: true })
-        const tLink = `${clientKeys.domain.server}/login`
+        const tLink = `${clientKeys.domain.server}/register`
         const userInfo = {
-            email,
+            username,
             password
         }
 
         transport.post(tLink, userInfo)
             .then((res) => {
-                console.log(res.user)
+                console.log('Response:', res)
+                if(res) {history.push('/login')} 
             })
-            // .then((data)=>{
-            //     console.log(`Logged in as: ${data.json()}`)
-            // })
             .catch(error => console.log("client Error:", error))
 
     }
 
-    const handleLogout = () => {
-        const transport = axios.create({ withCredentials: true })
-        const tLink = `${clientKeys.domain.server}/logout`
-
-        transport.get(tLink)
-            .then(res => console.log(res))
-            .catch(err => console.log(err))
-    }
-
-    const handleChangeEmail = (e) => {
+    const handleChangeUsername = (e) => {
         e.preventDefault()
-        setEmail(e.target.value)
+        setUsername(e.target.value)
+        console.log("username:", username)
     }
     const handleChangePassword = (e) => {
         e.preventDefault()
@@ -52,14 +44,12 @@ function Login() {
     return (
         <div className={classes.root}>
             <form className={classes.form} action="">
-                <TextField className={classes.input} label="Email" variant="outlined" onChange={handleChangeEmail} />
+                <TextField className={classes.input} label="Username" variant="outlined" onChange={handleChangeUsername} />
                 <TextField className={classes.input} label="Password" variant="outlined" onChange={handleChangePassword} />
-                <Button className={classes.button} type="submit" onClick={handleClick}>Login</Button>
+                <Button className={classes.button} type="submit" onClick={handleClick}>Register</Button>
             </form>
-            <Button className={classes.button} type="submit" onClick={handleLogout}>Logout</Button>
-
         </div>
     )
 }
 
-export default Login
+export default Register
