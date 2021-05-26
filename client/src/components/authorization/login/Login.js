@@ -22,13 +22,22 @@ function Login() {
 
         transport.post(tLink, userInfo)
             .then((res) => {
-                console.log(res.user)
+                console.log('user sent to client', res)
             })
-            // .then((data)=>{
-            //     console.log(`Logged in as: ${data.json()}`)
-            // })
             .catch(error => console.log("client Error:", error))
 
+    }
+
+    const handlePing = (e) => {
+        e.preventDefault()
+        const transport = axios.create({ withCredentials: true })
+        const tLink = `${clientKeys.domain.server}/`
+
+        transport.get(tLink)
+            .then((res) => {
+                console.log('user sent to client', res)
+            })
+            .catch(error => console.log("client Error:", error))
     }
 
     const handleLogout = () => {
@@ -49,6 +58,8 @@ function Login() {
         setPassword(e.target.value)
     }
 
+
+
     return (
         <div className={classes.root}>
             <form className={classes.form} action="">
@@ -57,6 +68,7 @@ function Login() {
                 <Button className={classes.button} type="submit" onClick={handleClick}>Login</Button>
             </form>
             <Button className={classes.button} type="submit" onClick={handleLogout}>Logout</Button>
+            <Button className={classes.button} type="submit" onClick={handlePing}>Ping</Button>
 
         </div>
     )
