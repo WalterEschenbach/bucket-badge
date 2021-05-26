@@ -8,54 +8,48 @@ import TextField from '@material-ui/core/TextField'
 
 function Login() {
     const classes = useStyles()
-    const [username, setUsername] = useState('')
+    const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
 
-    const handleClick = (e) => {
-        e.preventDefault()
-        const transport = axios.create({ withCredentials: true })
-        const tLink = `${clientKeys.domain.server}/login`
-        const userInfo = {
-            username,
-            password
-        }
-
-        transport.post(tLink, userInfo)
-            .then((req, res) => {
-                console.log('user submitted')
-            })
-            .catch(error => console.log("client Error:", error))
-
+    const handleClick = () => {
+        axios({
+            method: "POST",
+            data: {
+                username: email,
+                password: password,
+            },
+            withCredentials: true,
+            url: "http://localhost:3030/login",
+        }).then((res) => console.log(res));
     }
 
     const handleLogout = () => {
-        const transport = axios.create({ withCredentials: true })
-        const tLink = `${clientKeys.domain.server}/logout`
-
-        transport.get(tLink)
-            .then(res => console.log(res))
-            .catch(err => console.log(err))
+        axios({
+            method: "GET",
+            withCredentials: true,
+            url: "http://localhost:3030/logout",
+        }).then((res) => console.log(res));
     }
 
-    const handleChangeUsername = (e) => {
+    const handleChangeEmail = (e) => {
         e.preventDefault()
-        setUsername(e.target.value)
-        console.log("username:", username)
+        setEmail(e.target.value)
     }
     const handleChangePassword = (e) => {
         e.preventDefault()
         setPassword(e.target.value)
     }
 
+
+
     return (
         <div className={classes.root}>
             <form className={classes.form} action="">
-                <TextField className={classes.input} label="Username" variant="outlined" onChange={handleChangeUsername} />
+                <TextField className={classes.input} label="Email" variant="outlined" onChange={handleChangeEmail} />
                 <TextField className={classes.input} label="Password" variant="outlined" onChange={handleChangePassword} />
-                <Button className={classes.button} type="submit" onClick={handleClick}>Login</Button>
+                <Button className={classes.button} onClick={handleClick}>Login</Button>
             </form>
             <Button className={classes.button} type="submit" onClick={handleLogout}>Logout</Button>
-
         </div>
     )
 }

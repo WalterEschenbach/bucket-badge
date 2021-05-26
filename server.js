@@ -1,21 +1,18 @@
 const express = require('express')
-const app = express()
+const cors = require('cors')
 const PORT = process.env.PORT || 3030;
 const keys = require('./config/keys')
-app.use(express.json())
+const bcrypt = require('bcrypt')
+const User = require('./models/user.model')
+const session = require('express-session')
+const mongoose = require('mongoose')
+let passport = require('passport')
+const app = express()
+
 require('dotenv').config()
 
-
-const corsOptions = {
-    origin: [keys.domain.client || process.env.DOMAIN_CLIENT, "http://127.0.0.1:3000", "http://127.0.0.1:3030", "http://localhost:3030"],
-    credentials: true
-}
-const cors = require('cors')
-app.use(cors(corsOptions))
-
-
+// MONGODB
 const connectionURL = process.env.MONGODB_CONNECTION_STRING
-const mongoose = require('mongoose')
 mongoose.connect(connectionURL, {
     useUnifiedTopology: true,
     useNewUrlParser: true,
@@ -24,43 +21,50 @@ mongoose.connect(connectionURL, {
     .then(() => { console.log("DB connected...") })
     .catch(error => console.log(error))
 
-
-// Cookie Session Setup
-let cookieSession = require('cookie-session')
-
-app.use(cookieSession({
-    maxAge: 24 * 60 * 60 * 1000,
-    keys: [keys.session.cookieKey || process.env.SESSION_COOKIE_KEY]
+// MIDDLEWARE
+app.use(express.json())
+app.use(express.urlencoded({ extended: false }));
+app.use(cors({ origin: "http://localhost:3000", credentials: true }))
+app.use(session({
+    secret: "secretcode",
+    resave: true,
+    saveUninitialized: true,
 }))
-
-
-// Initialize Passport
-const passport = require('passport')
-
 app.use(passport.initialize())
 app.use(passport.session())
-require('./config/passport-setup')
 
+require('./config/passport-setup')(passport)
 
-app.get('/', (req, res) => {
-    res.send({ user: req.user })
+// Login User
+app.post('/login', (req, res, next) => {
+    passport.authenticate('local', (err, user, info) => {
+        if (err) throw err
+        if (!user) res.send('User does not exist...')
+        req.logIn(user, (err) => {
+            if (err) throw err
+            res.send('Successfully Authenticated')
+            console.log('req.user:', req.user)
+        });
+    })(req, res, next);
+});
+
+// Register User
+app.post('/register', async (req, res) => {
+    try {
+        const hashedPassword = await bcrypt.hash(req.body.password, 10)
+        const newUser = User({ email: req.body.email, password: hashedPassword })
+        newUser.save()
+        res.status(200).send(newUser)
+    } catch (error) {
+        res.redirect(`${keys.domain.client}/register`)
+    }
 })
 
+app.get("/user", (req, res) => {
+    res.send(req.user); // The req.user stores the entire user that has been authenticated inside of it.
+});
 
-
-app.post('/login',
-    passport.authenticate('local', { failureRedirect: '/login' }),
-    function (req, res) {
-        res.redirect('/');
-    });
-
-// Send user to client
-app.use(function (req, res, next) {
-    res.locals.currentUser = req.user;
-    next();
-})
-
-// auth logout
+// Logout
 app.get('/logout', (req, res) => {
     // handle with passport
     req.logout()
