@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useHistory } from 'react-router-dom'
 import axios from 'axios'
 import { clientKeys } from '../../../client-config/clientKeys'
 import { useStyles } from './styles'
@@ -6,10 +7,12 @@ import Button from '@material-ui/core/Button'
 import TextField from '@material-ui/core/TextField'
 
 
+
 function Login() {
     const classes = useStyles()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const history = useHistory()
 
     const handleClick = () => {
         axios({
@@ -19,15 +22,18 @@ function Login() {
                 password: password,
             },
             withCredentials: true,
-            url: "http://localhost:3030/login",
-        }).then((res) => console.log(res));
+            url: `${clientKeys.domain.server}/login`,
+        }).then((res) => {
+            console.log(res)
+            history.push('/')
+        });
     }
 
     const handleLogout = () => {
         axios({
             method: "GET",
             withCredentials: true,
-            url: "http://localhost:3030/logout",
+            url: `${clientKeys.domain.server}/logout`,
         }).then((res) => console.log(res));
     }
 
