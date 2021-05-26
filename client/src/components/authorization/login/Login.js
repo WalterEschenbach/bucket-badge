@@ -11,42 +11,24 @@ function Login() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
 
-    const handleClick = (e) => {
-        e.preventDefault()
-        const transport = axios.create({ withCredentials: true })
-        const tLink = `${clientKeys.domain.server}/login`
-        const userInfo = {
-            email,
-            password
-        }
-
-        transport.post(tLink, userInfo)
-            .then((res) => {
-                console.log('user sent to client', res)
-            })
-            .catch(error => console.log("client Error:", error))
-
-    }
-
-    const handlePing = (e) => {
-        e.preventDefault()
-        const transport = axios.create({ withCredentials: true })
-        const tLink = `${clientKeys.domain.server}/`
-
-        transport.get(tLink)
-            .then((res) => {
-                console.log('user sent to client', res)
-            })
-            .catch(error => console.log("client Error:", error))
+    const handleClick = () => {
+        axios({
+            method: "POST",
+            data: {
+                username: email,
+                password: password,
+            },
+            withCredentials: true,
+            url: "http://localhost:3030/login",
+        }).then((res) => console.log(res));
     }
 
     const handleLogout = () => {
-        const transport = axios.create({ withCredentials: true })
-        const tLink = `${clientKeys.domain.server}/logout`
-
-        transport.get(tLink)
-            .then(res => console.log(res))
-            .catch(err => console.log(err))
+        axios({
+            method: "GET",
+            withCredentials: true,
+            url: "http://localhost:3030/logout",
+        }).then((res) => console.log(res));
     }
 
     const handleChangeEmail = (e) => {
@@ -65,11 +47,9 @@ function Login() {
             <form className={classes.form} action="">
                 <TextField className={classes.input} label="Email" variant="outlined" onChange={handleChangeEmail} />
                 <TextField className={classes.input} label="Password" variant="outlined" onChange={handleChangePassword} />
-                <Button className={classes.button} type="submit" onClick={handleClick}>Login</Button>
+                <Button className={classes.button} onClick={handleClick}>Login</Button>
             </form>
             <Button className={classes.button} type="submit" onClick={handleLogout}>Logout</Button>
-            <Button className={classes.button} type="submit" onClick={handlePing}>Ping</Button>
-
         </div>
     )
 }
