@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import {useHistory} from 'react-router-dom'
+import { useHistory } from 'react-router-dom'
 import axios from 'axios'
 import { clientKeys } from '../../../client-config/clientKeys'
 import { useStyles } from './styles'
@@ -15,26 +15,26 @@ function Register() {
 
     const handleClick = (e) => {
         e.preventDefault()
-        const transport = axios.create({ withCredentials: true })
-        const tLink = `${clientKeys.domain.server}/register`
-        const userInfo = {
-            username,
-            password
-        }
 
-        transport.post(tLink, userInfo)
+        axios({
+            method: "POST",
+            url: `${clientKeys.domain.server}/register`,
+            withCredentials: true,
+            data: {
+                username,
+                password
+            }
+        })
             .then((res) => {
                 console.log('Response:', res)
-                if(res) {history.push('/login')} 
+                if (res) { history.push('/login') }
             })
             .catch(error => console.log("client Error:", error))
-
     }
 
     const handleChangeUsername = (e) => {
         e.preventDefault()
         setUsername(e.target.value)
-        console.log("username:", username)
     }
     const handleChangePassword = (e) => {
         e.preventDefault()

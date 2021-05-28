@@ -6,8 +6,9 @@ const bcrypt = require('bcrypt')
 const User = require('./models/user.model')
 const session = require('express-session')
 const mongoose = require('mongoose')
-let passport = require('passport')
+const passport = require('passport')
 const app = express()
+
 
 require('dotenv').config()
 
@@ -23,44 +24,53 @@ mongoose.connect(connectionURL, {
 
 // MIDDLEWARE
 app.use(express.json())
-app.use(express.urlencoded({ extended: false }));
-app.use(cors({ origin: "http://localhost:3000", credentials: true }))
+app.use(cors({ origin: ["http://localhost:3000", "http://localhost:3030"], credentials: true }))
 app.use(session({
-    secret: "secretcode",
+    name: 'bucketbadge:sess',
+    secret: 'secretcat',
     resave: true,
     saveUninitialized: true,
+    cookie: { secure: false }
 }))
+
 app.use(passport.initialize())
 app.use(passport.session())
 
-require('./config/passport-setup')(passport)
+
+
+require('./config/passport-setup')
+
 
 // Login User
 app.post('/login', (req, res, next) => {
-    passport.authenticate('local', (err, user, info) => {
+    passport.authenticate('local', {}, (err, user, info) => {
+        console.log('req', req)
+
         if (err) throw err
-        if (!user) res.send('User does not exist...')
-        req.logIn(user, (err) => {
-            if (err) throw err
-            res.send('Successfully Authenticated')
-            console.log('req.user:', req.user)
-        });
+        if (!user) console.log('User does not exist...')
+        if (user) {
+            console.log('req.login firing')
+            req.logIn(user, next)
+        }
     })(req, res, next);
+    res.send('User logged in...')
 });
 
 // Register User
 app.post('/register', async (req, res) => {
     try {
+        console.log('register req:', req.body)
         const hashedPassword = await bcrypt.hash(req.body.password, 10)
-        const newUser = User({ email: req.body.email, password: hashedPassword })
+        const newUser = User({ username: req.body.username, password: hashedPassword })
         newUser.save()
         res.status(200).send(newUser)
     } catch (error) {
-        res.redirect(`${keys.domain.client}/register`)
+        res.send('Error registering user...')
     }
 })
 
-app.get("/user", (req, res) => {
+app.get("/ping", (req, res) => {
+    console.log('req.user @ /user endpoint:', req.user)
     res.send(req.user); // The req.user stores the entire user that has been authenticated inside of it.
 });
 

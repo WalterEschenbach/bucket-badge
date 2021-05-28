@@ -2,11 +2,12 @@ import React from 'react'
 import { useStyles } from './styles'
 
 function Dashboard() {
-return (
-<div>
-
-</div>
-)
+    const classes = useStyles()
+    return (
+        <div className={classes.root}>
+            Dashboard
+        </div>
+    )
 }
 
 export default Dashboard

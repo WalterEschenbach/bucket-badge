@@ -10,23 +10,25 @@ import TextField from '@material-ui/core/TextField'
 
 function Login() {
     const classes = useStyles()
-    const [email, setEmail] = useState('')
+    const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     const history = useHistory()
 
-    const handleClick = () => {
+    const handleClick = (e) => {
+        e.preventDefault()
+        console.log('Client Login Submit Render')
         axios({
             method: "POST",
             data: {
-                username: email,
-                password: password,
+                username,
+                password,
             },
             withCredentials: true,
             url: `${clientKeys.domain.server}/login`,
         }).then((res) => {
-            console.log(res)
-            history.push('/')
-        });
+            console.log('login res', res)
+        }).then(() => history.push('/dashboard'))
+            .catch((err) => console.log(err))
     }
 
     const handleLogout = () => {
@@ -36,10 +38,17 @@ function Login() {
             url: `${clientKeys.domain.server}/logout`,
         }).then((res) => console.log(res));
     }
+    const handlePing = () => {
+        axios({
+            method: "GET",
+            withCredentials: true,
+            url: `${clientKeys.domain.server}/ping`,
+        }).then((res) => console.log(res));
+    }
 
-    const handleChangeEmail = (e) => {
+    const handleChangeUsername = (e) => {
         e.preventDefault()
-        setEmail(e.target.value)
+        setUsername(e.target.value)
     }
     const handleChangePassword = (e) => {
         e.preventDefault()
@@ -51,11 +60,12 @@ function Login() {
     return (
         <div className={classes.root}>
             <form className={classes.form} action="">
-                <TextField className={classes.input} label="Email" variant="outlined" onChange={handleChangeEmail} />
+                <TextField className={classes.input} label="Username" variant="outlined" onChange={handleChangeUsername} />
                 <TextField className={classes.input} label="Password" variant="outlined" onChange={handleChangePassword} />
                 <Button className={classes.button} onClick={handleClick}>Login</Button>
             </form>
-            <Button className={classes.button} type="submit" onClick={handleLogout}>Logout</Button>
+            <Button className={classes.button} onClick={handleLogout}>Logout</Button>
+            <Button className={classes.button} onClick={handlePing}>Ping</Button>
         </div>
     )
 }
